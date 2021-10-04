@@ -7,7 +7,7 @@ $(function() {
 	setupButtonListeners();
 });
 
-var infer = function() {
+function infer() {
 	$('#output').html("Inferring...");
 	$("#resultContainer").show();
 	$('html').scrollTop(100000);
@@ -49,7 +49,7 @@ var infer = function() {
 	});
 };
 
-var retrieveDefaultValuesFromLocalStorage = function() {
+function retrieveDefaultValuesFromLocalStorage() {
 	try {
 		var api_key = localStorage.getItem("rf.api_key");
 		var model = localStorage.getItem("rf.model");
@@ -75,7 +75,7 @@ var retrieveDefaultValuesFromLocalStorage = function() {
 	});
 };
 
-var setupButtonListeners = function() {
+function setupButtonListeners() {
 	// run inference when the form is submitted
 	$('#inputForm').submit(function() {
 		infer();
@@ -119,7 +119,7 @@ var setupButtonListeners = function() {
 	});
 };
 
-var getSettingsFromForm = function(cb) {
+function getSettingsFromForm(cb) {
 	var settings = {
 		method: "POST",
 	};
@@ -183,7 +183,7 @@ var getSettingsFromForm = function(cb) {
 	}
 };
 
-var getBase64fromFile = function(file) {
+function getBase64fromFile(file) {
 	return new Promise(function(resolve, reject) {
 		var reader = new FileReader();
 		reader.readAsDataURL(file);
@@ -199,7 +199,7 @@ var getBase64fromFile = function(file) {
 };
 
 
-var resizeImage = function(base64Str) {
+function resizeImage(base64Str) {
 
 	return new Promise(function(resolve, reject) {
 		var img = new Image();
