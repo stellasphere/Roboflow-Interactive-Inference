@@ -43,11 +43,16 @@ function infer() {
 
       var image = settings.imageElement
       model.detect(image).then(function(prediction) {
-        console.log(prediction);
-        $('#output').html("");
-        document.getElementById("output").appendChild(image);
-        
-        addBoundingBoxes(prediction);
+        var format = $('#format .active').attr('data-value');
+
+        if(format == "image") {
+          $('#output').html("");
+          document.getElementById("output").appendChild(image);
+          
+          addBoundingBoxes(prediction);
+        } else {
+          $('#output').html(JSON.stringify(prediction, null, 2))
+        }
       })
     });
 	});
@@ -169,7 +174,7 @@ function setupButtonListeners() {
 
 function getSettingsFromForm(cb) {
 	var settings = {};
-  
+  console.log(format)
 	if(format == "image") {
 		var labels = $('#labels .active').attr('data-value');
 
