@@ -38,10 +38,11 @@ function infer() {
       console.log("done")
       console.log(model)
 
+      var threshold = ($('#confidence').val())/100;
+      var overlap = ($('#overlap').val())/100;
       model.configure({
-        threshold: 0.5,
-        overlap: 0.5,
-        max_objects: 20
+        threshold: threshold,
+        overlap: overlap
       });
 
       model.detect(image).then(function(prediction) {
