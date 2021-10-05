@@ -263,3 +263,7 @@ function resizeImage(base64Str) {
     
 	});	
 };
+
+function copyResult() {
+  navigator.clipboard.writeText($("#output").text());
+}
