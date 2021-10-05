@@ -5,12 +5,12 @@ $(function() {
 	$('#api_key').val("DFvQrIh8x90A1oTLSuv0");
 
 	setupButtonListeners();
+  retrieveDefaultValuesFromLocalStorage();
 });
 
 function infer() {
 	$('#output').html("Inferring...");
 	$("#resultContainer").show();
-	$('html').scrollTop(100000);
 
 	getSettingsFromForm(function(settings) {
 		settings.error = function(xhr) {
@@ -23,31 +23,69 @@ function infer() {
 			].join("\n"));
 		};
 
-		$.ajax(settings).then(function(response) {
-			if(settings.format == "json") {
-				var pretty = $('<pre>');
-				var formatted = JSON.stringify(response, null, 4)
+		console.log(settings)
 
-				pretty.html(formatted);
-				$('#output').html("").append(pretty);
-				$('html').scrollTop(100000);
-			} else {
-				var arrayBufferView = new Uint8Array(response);
-				var blob = new Blob([arrayBufferView], {
-					'type': 'image\/jpeg'
-				});
-				var base64image = window.URL.createObjectURL(blob);
+    var image = document.createElement("img");
+    image.src = settings.data;
+    image.id = "resultimage";
 
-				var img = $('<img/>');
-				img.get(0).onload = function() {
-					$('html').scrollTop(100000);
-				};
-				img.attr('src', base64image);
-				$('#output').html("").append(img);
-			}
-		});
+    roboflow.auth({
+      publishable_key: $('#api_key').val()
+    }).load({
+      model: $('#model').val(),
+      version: $('#version').val()
+    }).then(function(model) {
+      console.log("done")
+      console.log(model)
+
+      model.configure({
+        threshold: 0.5,
+        overlap: 0.5,
+        max_objects: 20
+      });
+
+      model.detect(image).then(function(prediction) {
+        console.log(prediction);
+        $('#output').html("");
+	      $("body").scrollTop(0);
+        document.getElementById("output").appendChild(image);
+        
+        setTimeout(addBoundingBoxes(prediction),2000);
+      })
+    });
 	});
 };
+
+function addBoundingBoxes(predictions) {
+  var imageBBox = document.getElementById("resultimage").getBoundingClientRect();
+  console.log(imageBBox)
+
+  var zindex = 0;
+  predictions.sort(function(a,b){
+    return (a.bbox.width*a.bbox.height) - (b.bbox.width*b.bbox.height);
+  });
+
+  for(i in predictions) {
+    var prediction = predictions[i];
+    console.log(prediction);
+
+    // PREDICTION BOX
+    var predictionBox = document.createElement("div")
+    console.log(predictionBox.style)
+    var predictionBoxStyle = ""
+    predictionBoxStyle += `position: absolute;`;
+    predictionBoxStyle += `border: 0.5px black solid;`;//${prediction.color}
+    predictionBoxStyle += `top: calc(${prediction.bbox.y + imageBBox.top}px - 0.75rem);`;
+    predictionBoxStyle += `left: calc(${prediction.bbox.x + imageBBox.left}px - 0.75rem);`;
+    predictionBoxStyle += `width: ${prediction.bbox.width}px;`;
+    predictionBoxStyle += `height: ${prediction.bbox.height}px;`;
+    predictionBoxStyle += `z-index: ${zindex};`;
+    zindex++
+    predictionBox.style = predictionBoxStyle;
+    document.getElementById("output").appendChild(predictionBox);
+  }
+  tippy('[data-tippy-content]');
+}
 
 function retrieveDefaultValuesFromLocalStorage() {
 	try {
