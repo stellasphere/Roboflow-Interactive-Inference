@@ -277,3 +277,15 @@ input:disabled {
 #resultContainer {
 	display: none;
 }
+
+.predictionbox:hover > .predictionlabel{
+  display: block;
+}
+
+.predictionlabel {
+  display: none;
+  position: absolute;
+  top: -23px;
+  padding: 2.5px;
+  color: #fff;
+}

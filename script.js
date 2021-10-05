@@ -47,16 +47,16 @@ function infer() {
       model.detect(image).then(function(prediction) {
         console.log(prediction);
         $('#output').html("");
-	      $("body").scrollTop(0);
         document.getElementById("output").appendChild(image);
         
-        setTimeout(addBoundingBoxes(prediction),2000);
+        addBoundingBoxes(prediction);
       })
     });
 	});
 };
 
 function addBoundingBoxes(predictions) {
+  $("body").scrollTop(0);
   var imageBBox = document.getElementById("resultimage").getBoundingClientRect();
   console.log(imageBBox)
 
@@ -70,21 +70,33 @@ function addBoundingBoxes(predictions) {
     console.log(prediction);
 
     // PREDICTION BOX
-    var predictionBox = document.createElement("div")
+    var predictionBox = document.createElement("div");
     console.log(predictionBox.style)
-    var predictionBoxStyle = ""
+    var predictionBoxStyle = "";
+    var strokeWidth = $('#stroke .active').attr('data-value')
     predictionBoxStyle += `position: absolute;`;
-    predictionBoxStyle += `border: 0.5px black solid;`;//${prediction.color}
-    predictionBoxStyle += `top: calc(${prediction.bbox.y + imageBBox.top}px - 0.75rem);`;
-    predictionBoxStyle += `left: calc(${prediction.bbox.x + imageBBox.left}px - 0.75rem);`;
+    predictionBoxStyle += `border: ${strokeWidth}px ${prediction.color} solid;`;
+    predictionBoxStyle += `top: calc(${prediction.bbox.y + imageBBox.top}px - 1rem);`;
+    predictionBoxStyle += `left: calc(${prediction.bbox.x + imageBBox.left}px - 0.6rem);`;
     predictionBoxStyle += `width: ${prediction.bbox.width}px;`;
     predictionBoxStyle += `height: ${prediction.bbox.height}px;`;
     predictionBoxStyle += `z-index: ${zindex};`;
     zindex++
     predictionBox.style = predictionBoxStyle;
+    predictionBox.classList.add("prediction");
+    predictionBox.classList.add("predictionbox");
+    
+    // LABEL
+    var label = document.createElement("div");
+    var labelText = document.createTextNode(prediction.class);
+    label.style = `background-color: ${prediction.color};`
+    label.appendChild(labelText);
+    label.classList.add("prediction");
+    label.classList.add("predictionlabel");
+
+    predictionBox.appendChild(label);
     document.getElementById("output").appendChild(predictionBox);
   }
-  tippy('[data-tippy-content]');
 }
 
 function retrieveDefaultValuesFromLocalStorage() {
