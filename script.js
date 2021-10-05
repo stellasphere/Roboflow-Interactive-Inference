@@ -25,10 +25,6 @@ function infer() {
 
 		console.log(settings)
 
-    var image = document.createElement("img");
-    image.src = settings.data;
-    image.id = "resultimage";
-
     roboflow.auth({
       publishable_key: $('#api_key').val()
     }).load({
@@ -45,6 +41,7 @@ function infer() {
         overlap: overlap
       });
 
+      var image = settings.imageElement
       model.detect(image).then(function(prediction) {
         console.log(prediction);
         $('#output').html("");
@@ -171,37 +168,12 @@ function setupButtonListeners() {
 };
 
 function getSettingsFromForm(cb) {
-	var settings = {
-		method: "POST",
-	};
-
-	var parts = [
-		"https://detect.roboflow.com/",
-		$('#model').val(),
-		"/",
-		$('#version').val(),
-		"?api_key=" + $('#api_key').val()
-	];
-
-	var classes = $('#classes').val();
-	if(classes) parts.push("&classes=" + classes);
-
-	var confidence = $('#confidence').val();
-	if(confidence) parts.push("&confidence=" + confidence);
-
-	var overlap = $('#overlap').val();
-	if(overlap) parts.push("&overlap=" + overlap);
-
-	var format = $('#format .active').attr('data-value');
-	parts.push("&format=" + format);
-	settings.format = format;
-
+	var settings = {};
+  
 	if(format == "image") {
 		var labels = $('#labels .active').attr('data-value');
-		if(labels) parts.push("&labels=on");
 
 		var stroke = $('#stroke .active').attr('data-value');
-		if(stroke) parts.push("&stroke=" + stroke);
 
 		settings.xhr = function() {
 			var override = new XMLHttpRequest();
@@ -216,20 +188,25 @@ function getSettingsFromForm(cb) {
 		if(!file) return alert("Please select a file.");
 
 		getBase64fromFile(file).then(function(base64image) {
-			settings.url = parts.join("");
 			settings.data = base64image;
+			
+      var image = document.createElement("img");
+      image.src = settings.data;
+      image.id = "resultimage";
 
-			console.log(settings);
+      settings.imageElement = image;
 			cb(settings);
 		});
 	} else {
 		var url = $('#url').val();
 		if(!url) return alert("Please enter an image URL");
 
-		parts.push("&image=" + encodeURIComponent(url));
+    var image = document.createElement("img");
+    image.src = url;
+    image.id = "resultimage";
+    image.setAttribute("crossorigin","anonymous")
 
-		settings.url = parts.join("");
-		console.log(settings);
+    settings.imageElement = image;
 		cb(settings);
 	}
 };
